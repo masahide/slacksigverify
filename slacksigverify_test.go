@@ -33,8 +33,8 @@ func TestParserOuterCallBackEvent(t *testing.T) {
 				"event_time": 1234567890
 		}
 	`
-	nowUnix = func() int64 { return int64(1533878462) }
-	timestamp := strconv.Itoa(int(nowUnix()))
+	NowUnix = func() int64 { return int64(1533878462) }
+	timestamp := strconv.Itoa(int(NowUnix()))
 	msg, e := ParseEvent(json.RawMessage(eventsAPIRawCallbackEvent), signingSecret, timestamp, requestBody, signature)
 
 	if e != nil {
@@ -67,8 +67,8 @@ func TestParseURLVerificationEvent(t *testing.T) {
 			"type": "url_verification"
 		}
 	`
-	nowUnix = func() int64 { return int64(1533878462) }
-	timestamp := strconv.Itoa(int(nowUnix()))
+	NowUnix = func() int64 { return int64(1533878462) }
+	timestamp := strconv.Itoa(int(NowUnix()))
 	msg, e := ParseEvent(json.RawMessage(urlVerificationEvent), signingSecret, timestamp, requestBody, signature)
 	if e != nil {
 		fmt.Println(e)
@@ -103,8 +103,8 @@ func TestThatOuterCallbackEventHasInnerEvent(t *testing.T) {
 				"event_time": 1234567890
 		}
 	`
-	nowUnix = func() int64 { return int64(1533878462) }
-	timestamp := strconv.Itoa(int(nowUnix()))
+	NowUnix = func() int64 { return int64(1533878462) }
+	timestamp := strconv.Itoa(int(NowUnix()))
 	msg, e := ParseEvent(json.RawMessage(eventsAPIRawCallbackEvent), signingSecret, timestamp, requestBody, signature)
 	if e != nil {
 		fmt.Println(e)
@@ -138,8 +138,8 @@ func TestBadTokenVerification(t *testing.T) {
 			"type": "url_verification"
 		}
 	`
-	nowUnix = func() int64 { return int64(1533878462) }
-	timestamp := strconv.Itoa(int(nowUnix()))
+	NowUnix = func() int64 { return int64(1533878462) }
+	timestamp := strconv.Itoa(int(NowUnix()))
 	signingSecret = "hoge"
 	_, e := ParseEvent(json.RawMessage(urlVerificationEvent), signingSecret, timestamp, requestBody, signature)
 	if e == nil {

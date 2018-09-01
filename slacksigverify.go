@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 	"strconv"
 	"time"
@@ -16,7 +17,8 @@ import (
 )
 
 var (
-	nowUnix = func() int64 { return time.Now().Unix() }
+	// NowUnix Function to return current time as unixtime
+	NowUnix = func() int64 { return time.Now().Unix() }
 )
 
 // http://cavaliercoder.com/blog/optimized-abs-for-int64-in-go.html
@@ -31,7 +33,7 @@ func isOutOfRangeTimestamp(s string) bool {
 	if err != nil {
 		return false
 	}
-	return abs(nowUnix()-int64(i)) > 60*5
+	return abs(NowUnix()-int64(i)) > 60*5
 }
 
 func verifySSS(signingSecret, slackRequest, slackSignature []byte) bool {
@@ -39,8 +41,11 @@ func verifySSS(signingSecret, slackRequest, slackSignature []byte) bool {
 	sig.Write(slackRequest)
 	tokenResult := hex.EncodeToString(sig.Sum(nil))
 	requestHash := append([]byte("v0="), tokenResult...)
-	//log.Printf("requestHash: %s", requestHash)
-	return hmac.Equal(requestHash, slackSignature)
+	if hmac.Equal(requestHash, slackSignature) {
+		return true
+	}
+	log.Printf("Failed verify requestHash: %s", requestHash)
+	return false
 }
 
 // ParseEvent parses the outter and inner events (if applicable) of an events
