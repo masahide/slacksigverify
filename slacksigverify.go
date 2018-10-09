@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"reflect"
 	"strconv"
 	"time"
@@ -44,21 +43,12 @@ func verifySSS(signingSecret, slackRequest, slackSignature []byte) bool {
 	if hmac.Equal(requestHash, slackSignature) {
 		return true
 	}
-	log.Printf("Failed verify requestHash: %s", requestHash)
+	//log.Printf("Failed verify requestHash:%s,slackSignature:%s signingSecret:%s", requestHash, slackSignature, signingSecret)
 	return false
 }
 
-// ParseEvent parses the outter and inner events (if applicable) of an events
-// api event returning a EventsAPIEvent type. If the event is a url_verification event,
-// the inner event is empty.
-func ParseEvent(rawEvent json.RawMessage, signingSecret, timestamp, requestBody, signature string) (slackevents.EventsAPIEvent, error) {
-	if isOutOfRangeTimestamp(timestamp) {
-		return slackevents.EventsAPIEvent{}, errors.New("timestamp is out of current time")
-	}
-	verifySlackRequest := fmt.Sprintf("v0:%v:%v", timestamp, requestBody)
-	if !verifySSS([]byte(signingSecret), []byte(verifySlackRequest), []byte(signature)) {
-		return slackevents.EventsAPIEvent{}, errors.New("Invalid request signature")
-	}
+// ParseEventRowMes parses the outer and inner events
+func ParseEventRowMes(rawEvent json.RawMessage) (slackevents.EventsAPIEvent, error) {
 	e, err := parseOuterEvent(rawEvent)
 	if err != nil {
 		return slackevents.EventsAPIEvent{}, err
@@ -97,6 +87,20 @@ func ParseEvent(rawEvent json.RawMessage, signingSecret, timestamp, requestBody,
 		Data:       urlVerificationEvent,
 		InnerEvent: slackevents.EventsAPIInnerEvent{},
 	}, nil
+}
+
+// ParseEvent parses the outter and inner events (if applicable) of an events
+// api event returning a EventsAPIEvent type. If the event is a url_verification event,
+// the inner event is empty.
+func ParseEvent(rawEvent json.RawMessage, signingSecret, timestamp, requestBody, signature string) (slackevents.EventsAPIEvent, error) {
+	if isOutOfRangeTimestamp(timestamp) {
+		return slackevents.EventsAPIEvent{}, errors.New("timestamp is out of current time")
+	}
+	verifySlackRequest := fmt.Sprintf("v0:%v:%v", timestamp, requestBody)
+	if !verifySSS([]byte(signingSecret), []byte(verifySlackRequest), []byte(signature)) {
+		return slackevents.EventsAPIEvent{}, errors.New("Invalid request signature")
+	}
+	return ParseEventRowMes(rawEvent)
 }
 
 // eventsMap checks both slack.EventsMapping and
