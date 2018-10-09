@@ -56,7 +56,7 @@ func ParseEventRowMes(rawEvent json.RawMessage) (slackevents.EventsAPIEvent, err
 
 	if e.Type == slackevents.CallbackEvent {
 		cbEvent := e.Data.(*slackevents.EventsAPICallbackEvent)
-		innerEvent, err := parseInnerEvent(cbEvent)
+		innerEvent, err := ParseInnerEvent(cbEvent)
 		if err != nil {
 			err := fmt.Errorf("EventsAPI Error parsing inner event: %s, %s", innerEvent.Type, err)
 			return slackevents.EventsAPIEvent{
@@ -175,7 +175,8 @@ func parseOuterEvent(rawE json.RawMessage) (slackevents.EventsAPIEvent, error) {
 	}, nil
 }
 
-func parseInnerEvent(e *slackevents.EventsAPICallbackEvent) (slackevents.EventsAPIEvent, error) {
+// ParseInnerEvent parse inner event
+func ParseInnerEvent(e *slackevents.EventsAPICallbackEvent) (slackevents.EventsAPIEvent, error) {
 	iE := &slack.Event{}
 	rawInnerJSON := e.InnerEvent
 	err := json.Unmarshal(*rawInnerJSON, iE)
